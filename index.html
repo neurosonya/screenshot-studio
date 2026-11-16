@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Скриншот-студия</title>
+<style>
+  :root {
+    --accent: #6d28d9;
+    --accent-hover: #5b21b6;
+    --bg: #f1f5f9;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+  }
+  #app { display: flex; height: 100vh; }
+
+  /* ---------- Sidebar ---------- */
+  #sidebar {
+    width: 330px; min-width: 330px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 18px 40px;
+  }
+  #sidebar h1 {
+    font-size: 17px; font-weight: 800; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  #sidebar h1 .logo {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+    display: inline-block;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--accent); color: #fff; border: none; cursor: pointer;
+    border-radius: 999px; padding: 9px 16px; font-size: 13.5px; font-weight: 600;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn.block { width: 100%; }
+  .btn.ghost {
+    background: #fff; color: var(--text); border: 1px solid var(--border);
+  }
+  .btn.ghost:hover { background: #f8fafc; }
+  .section { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 14px; }
+  .section > .title {
+    font-weight: 700; font-size: 13px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .title .adv {
+    font-size: 11.5px; color: var(--muted); cursor: pointer; font-weight: 500; user-select: none;
+  }
+  .title .adv:hover { color: var(--accent); }
+  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .row label { flex: 1; color: var(--text); font-size: 13px; }
+  .row .val {
+    background: #f1f5f9; border-radius: 6px; padding: 2px 7px; font-size: 12px;
+    min-width: 34px; text-align: center; color: var(--muted);
+  }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
+    background: #e2e8f0; outline: none; margin: 4px 0 10px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; border: 1px solid #cbd5e1; box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer;
+  }
+  input[type="color"] {
+    width: 30px; height: 26px; border: 1px solid var(--border); border-radius: 6px;
+    padding: 1px; background: #fff; cursor: pointer;
+  }
+  input[type="text"], input[type="number"], select {
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px;
+    font-size: 13px; background: #fff; color: var(--text); outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  .seg { display: flex; background: #f1f5f9; border-radius: 8px; padding: 3px; gap: 3px; margin-bottom: 10px; }
+  .seg button {
+    flex: 1; border: none; background: transparent; padding: 6px 4px; border-radius: 6px;
+    font-size: 12.5px; cursor: pointer; color: var(--muted); font-weight: 600;
+  }
+  .seg button.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .grid-bg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px; }
+  .grid-bg .sw {
+    aspect-ratio: 1; border-radius: 9px; cursor: pointer; border: 2px solid transparent;
+    transition: transform .1s;
+  }
+  .grid-bg .sw:hover { transform: scale(1.07); }
+  .grid-bg .sw.active { border-color: var(--text); }
+  .checker, .grid-bg .sw.checker {
+    background-color: #fff;
+    background-image: linear-gradient(45deg, #d1d5db 25%, transparent 25%, transparent 75%, #d1d5db 75%),
+                      linear-gradient(45deg, #d1d5db 25%, transparent 25%, transparent 75%, #d1d5db 75%);
+    background-size: 12px 12px; background-position: 0 0, 6px 6px;
+  }
+  .posgrid { display: grid; grid-template-columns: repeat(3, 28px); gap: 4px; margin-bottom: 10px; }
+  .posgrid button {
+    width: 28px; height: 28px; border: 1px solid var(--border); background: #fff;
+    border-radius: 6px; cursor: pointer; position: relative;
+  }
+  .posgrid button::after {
+    content: ""; position: absolute; inset: 8px; border-radius: 3px; background: #cbd5e1;
+  }
+  .posgrid button.active { border-color: var(--accent); }
+  .posgrid button.active::after { background: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .chips button {
+    border: 1px solid var(--border); background: #fff; border-radius: 999px;
+    padding: 5px 11px; font-size: 12.5px; cursor: pointer; color: var(--text);
+  }
+  .chips button.active { border-color: var(--accent); color: var(--accent); font-weight: 700; background: #f5f3ff; }
+  .sociallist { list-style: none; margin-bottom: 8px; }
+  .sociallist li {
+    display: flex; justify-content: space-between; padding: 6px 8px; border-radius: 8px;
+    cursor: pointer; font-size: 13px;
+  }
+  .sociallist li:hover { background: #f8fafc; }
+  .sociallist li.active { background: #f5f3ff; color: var(--accent); font-weight: 600; }
+  .sociallist li span:last-child { color: var(--muted); font-size: 12px; }
+  .switchrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .switch { position: relative; width: 38px; height: 22px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute; inset: 0; background: #cbd5e1; border-radius: 999px; cursor: pointer; transition: .15s;
+  }
+  .switch .slider::before {
+    content: ""; position: absolute; width: 18px; height: 18px; left: 2px; top: 2px;
+    background: #fff; border-radius: 50%; transition: .15s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(16px); }
+  .advbox { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+  .hidden { display: none !important; }
+  .projlist { display: flex; flex-direction: column; gap: 8px; }
+  .projitem {
+    display: flex; gap: 10px; align-items: center; border: 1px solid var(--border);
+    border-radius: 10px; padding: 6px; cursor: pointer;
+  }
+  .projitem:hover { border-color: var(--accent); }
+  .projitem img { width: 56px; height: 42px; object-fit: cover; border-radius: 6px; background: #eee; }
+  .projitem .meta { flex: 1; min-width: 0; }
+  .projitem .meta .nm { font-weight: 600; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .projitem .meta .dt { font-size: 11px; color: var(--muted); }
+  .projitem .del { border: none; background: none; cursor: pointer; color: var(--muted); font-size: 15px; padding: 4px; }
+  .projitem .del:hover { color: #dc2626; }
+  .note { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+  /* ---------- Main ---------- */
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #topbar {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; gap: 10px;
+  }
+  #toolbar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  #toolbar .tool {
+    width: 34px; height: 34px; border: 1px solid transparent; background: transparent;
+    border-radius: 8px; cursor: pointer; font-size: 16px; display: inline-flex;
+    align-items: center; justify-content: center; color: var(--text);
+  }
+  #toolbar .tool:hover { background: #f1f5f9; }
+  #toolbar .tool.active { background: #f5f3ff; border-color: var(--accent); color: var(--accent); }
+  #toolbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 6px; }
+  #toolbar input[type="color"] { width: 26px; height: 26px; }
+  #toolbar .mini-range { width: 70px; margin: 0; }
+  #canvasArea {
+    flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: center;
+    padding: 28px; position: relative;
+  }
+  #canvasWrap { position: relative; margin: auto; }
+  #preview { display: block; box-shadow: 0 4px 24px rgba(0,0,0,.12); border-radius: 4px; }
+  #textEditor {
+    position: absolute; display: none; background: rgba(255,255,255,.92); border: 2px solid var(--accent);
+    border-radius: 6px; padding: 3px 6px; font-weight: 700; outline: none; min-width: 120px; z-index: 30;
+  }
+  #emojiPalette {
+    position: absolute; display: none; background: #fff; border: 1px solid var(--border);
+    border-radius: 12px; padding: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.15); z-index: 40;
+    grid-template-columns: repeat(8, 32px); gap: 2px;
+  }
+  #emojiPalette.open { display: grid; }
+  #emojiPalette button { border: none; background: none; font-size: 20px; cursor: pointer; border-radius: 6px; padding: 3px; }
+  #emojiPalette button:hover { background: #f1f5f9; }
+
+  /* start screen */
+  #dropzone {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px; z-index: 10;
+    background: var(--bg); border: 2px dashed #cbd5e1; margin: 14px; border-radius: 16px;
+  }
+  #dropzone .big { font-size: 22px; font-weight: 800; }
+  #dropzone .sub { color: var(--muted); margin-bottom: 8px; }
+  #dropzone .btn { width: 230px; }
+  #dropzone.hidden { display: none; }
+  #dropzone.drag { border-color: var(--accent); background: #f5f3ff; }
+
+  #bottombar {
+    background: var(--panel); border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px;
+  }
+  #bottombar select { border-radius: 999px; padding: 8px 10px; font-weight: 600; }
+  .toast {
+    position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: #fff; padding: 10px 18px; border-radius: 999px;
+    font-size: 13.5px; z-index: 100; opacity: 0; transition: opacity .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  #shortcutsPanel {
+    position: fixed; right: 16px; top: 60px; background: #fff; border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; box-shadow: 0 10px 40px rgba(0,0,0,.15);
+    z-index: 60; display: none; width: 260px;
+  }
+  #shortcutsPanel.open { display: block; }
+  #shortcutsPanel h3 { font-size: 13.5px; margin-bottom: 8px; }
+  #shortcutsPanel table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  #shortcutsPanel td { padding: 3px 0; color: var(--muted); }
+  #shortcutsPanel td:last-child { text-align: right; color: var(--text); }
+  kbd {
+    background: #f1f5f9; border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 5px; padding: 1px 6px; font-size: 11px; font-family: inherit;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside id="sidebar">
+    <h1><span class="logo"></span> Скриншот-студия</h1>
+    <button class="btn block" id="btnNew">+ Новый снап</button>
+
+    <div class="section">
+      <div class="title">Фон <span class="adv" id="bgAdvToggle">Расширенно</span></div>
+      <div class="seg" id="bgTabs">
+        <button data-tab="gradient" class="active">Градиент</button>
+        <button data-tab="solid">Цвет</button>
+        <button data-tab="image">Картинка</button>
+      </div>
+      <div id="bgTabGradient">
+        <div class="grid-bg" id="gradGrid"></div>
+      </div>
+      <div id="bgTabSolid" class="hidden">
+        <div class="grid-bg" id="solidGrid"></div>
+        <div class="row"><label>Свой цвет</label><input type="color" id="solidColor" value="#e2e8f0"></div>
+      </div>
+      <div id="bgTabImage" class="hidden">
+        <button class="btn ghost block" id="btnBgImage">Выбрать картинку фона</button>
+        <input type="file" id="bgImageInput" accept="image/*" class="hidden">
+      </div>
+      <div id="bgAdv" class="advbox hidden">
+        <div class="row"><label>Свой градиент</label>
+          <input type="color" id="gradC1" value="#8b5cf6">
+          <input type="color" id="gradC2" value="#ec4899">
+        </div>
+        <div class="row"><label>Угол</label><span class="val" id="gradAngleVal">135</span></div>
+        <input type="range" id="gradAngle" min="0" max="360" value="135">
+        <div class="row"><label>Размытие фона</label><span class="val" id="bgBlurVal">0</span></div>
+        <input type="range" id="bgBlur" min="0" max="40" value="0">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="title">Скриншот</div>
+      <div class="row"><label>Размер</label><span class="val" id="imgScaleVal">100%</span></div>
+      <input type="range" id="imgScale" min="20" max="200" value="100">
+      <div class="row"><label>Позиция</label></div>
+      <div class="posgrid" id="posGrid"></div>
+      <div class="row"><label>Отступ</label><span class="val" id="paddingVal">60</span></div>
+      <input type="range" id="padding" min="0" max="200" value="60">
+      <div class="row"><label>Подложка</label><span class="val" id="insetVal">0</span><input type="color" id="insetColor" value="#ffffff"></div>
+      <input type="range" id="inset" min="0" max="60" value="0">
+      <div class="row"><label>Тень</label><span class="val" id="shadowVal">30</span><input type="color" id="shadowColor" value="#000000"></div>
+      <input type="range" id="shadow" min="0" max="100" value="30">
+      <div class="row"><label>Скругление</label><span class="val" id="roundedVal">16</span></div>
+      <input type="range" id="rounded" min="0" max="60" value="16">
+      <div class="row"><label>Обводка</label><span class="val" id="borderVal">0</span><input type="color" id="borderColor" value="#ffffff"></div>
+      <input type="range" id="border" min="0" max="20" value="0">
+    </div>
+
+    <div class="section">
+      <div class="title">Мокап браузера</div>
+      <div class="seg" id="mockupSeg">
+        <button data-v="none" class="active">Нет</button>
+        <button data-v="light">Светлый</button>
+        <button data-v="dark">Темный</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="title">Формат</div>
+      <div class="chips" id="ratioChips">
+        <button data-r="auto" class="active">Auto</button>
+        <button data-r="4:3">4:3</button>
+        <button data-r="3:2">3:2</button>
+        <button data-r="16:9">16:9</button>
+        <button data-r="1:1">1:1</button>
+        <button data-r="9:16">9:16</button>
+      </div>
+      <ul class="sociallist" id="socialList"></ul>
+      <div class="row">
+        <label>Свой размер</label>
+        <input type="number" id="customW" placeholder="Ширина" style="width:76px">
+        <span style="color:var(--muted)">x</span>
+        <input type="number" id="customH" placeholder="Высота" style="width:76px">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="title">Подпись</div>
+      <div class="switchrow">
+        <label>Показывать подпись</label>
+        <label class="switch"><input type="checkbox" id="wmToggle"><span class="slider"></span></label>
+      </div>
+      <input type="text" id="wmText" value="@NeuralProfit" style="width:100%">
+    </div>
+
+    <div class="section">
+      <div class="title">Качество экспорта</div>
+      <div class="seg" id="qualitySeg">
+        <button data-v="1">1x</button>
+        <button data-v="2" class="active">2x</button>
+        <button data-v="3">3x</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="title">Мои снапы</div>
+      <div class="projlist" id="projList"></div>
+      <p class="note" id="projEmpty">Пока пусто. Нажми «Сохранить» внизу - проект появится здесь, и его можно будет открыть и доредактировать.</p>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main id="main">
+    <div id="topbar">
+      <div id="toolbar">
+        <button class="tool active" data-tool="select" title="Выбор и перемещение (V)">&#10548;</button>
+        <button class="tool" data-tool="rect" title="Прямоугольник (R)">&#9645;</button>
+        <button class="tool" data-tool="ellipse" title="Круг (O)">&#9675;</button>
+        <button class="tool" data-tool="line" title="Линия (L)">&#9586;</button>
+        <button class="tool" data-tool="arrow" title="Стрелка (A)">&#8599;</button>
+        <button class="tool" data-tool="text" title="Текст (T)">T</button>
+        <button class="tool" data-tool="pencil" title="Карандаш (P)">&#9998;</button>
+        <button class="tool" id="emojiBtn" title="Эмодзи">&#128512;</button>
+        <span class="sep"></span>
+        <input type="color" id="annColor" value="#ef4444" title="Цвет">
+        <input type="range" id="annWidth" class="mini-range" min="2" max="20" value="5" title="Толщина">
+        <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;">
+          <input type="checkbox" id="annFill"> заливка
+        </label>
+        <span class="sep"></span>
+        <button class="tool" id="undoBtn" title="Отменить (Cmd+Z)">&#8634;</button>
+        <button class="tool" id="clearAnnBtn" title="Убрать все аннотации">&#128465;</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="zoomSelect">
+          <option value="0.25">25%</option>
+          <option value="0.5">50%</option>
+          <option value="0.75">75%</option>
+          <option value="1">100%</option>
+          <option value="2">200%</option>
+          <option value="fit" selected>По размеру окна</option>
+        </select>
+        <button class="tool" id="helpBtn" title="Горячие клавиши" style="border:1px solid var(--border);border-radius:50%;">?</button>
+      </div>
+    </div>
+
+    <div id="canvasArea">
+      <div id="dropzone">
+        <div style="font-size:28px">&#10024;</div>
+        <div class="big">Начни свой снап!</div>
+        <div class="sub">Перетащи картинку сюда, вставь из буфера (Cmd+V) или</div>
+        <button class="btn" id="btnBrowse">&#128193; Выбрать файл</button>
+        <button class="btn" id="btnCapture">&#9634; Снять экран</button>
+      </div>
+      <div id="canvasWrap">
+        <canvas id="preview"></canvas>
+        <input id="textEditor" type="text" placeholder="Текст...">
+        <div id="emojiPalette"></div>
+      </div>
+    </div>
+
+    <div id="bottombar">
+      <button class="btn" id="btnExport">&#8681; Экспорт</button>
+      <select id="formatSelect">
+        <option value="png">PNG</option>
+        <option value="jpeg">JPG</option>
+        <option value="webp">WebP</option>
+      </select>
+      <button class="btn" id="btnSave">&#128190; Сохранить</button>
+      <button class="btn" id="btnCopy">&#128203; Копировать</button>
+    </div>
+  </main>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" class="hidden">
+<div class="toast" id="toast"></div>
+
+<div id="shortcutsPanel">
+  <h3>Горячие клавиши</h3>
+  <table>
+    <tr><td>Вставить картинку</td><td><kbd>Cmd</kbd> <kbd>V</kbd></td></tr>
+    <tr><td>Копировать результат</td><td><kbd>Cmd</kbd> <kbd>Shift</kbd> <kbd>C</kbd></td></tr>
+    <tr><td>Сохранить проект</td><td><kbd>Cmd</kbd> <kbd>S</kbd></td></tr>
+    <tr><td>Экспорт</td><td><kbd>Cmd</kbd> <kbd>E</kbd></td></tr>
+    <tr><td>Отменить аннотацию</td><td><kbd>Cmd</kbd> <kbd>Z</kbd></td></tr>
+    <tr><td>Удалить выбранное</td><td><kbd>Delete</kbd></td></tr>
+    <tr><td>Выбор</td><td><kbd>V</kbd></td></tr>
+    <tr><td>Прямоугольник</td><td><kbd>R</kbd></td></tr>
+    <tr><td>Круг</td><td><kbd>O</kbd></td></tr>
+    <tr><td>Линия</td><td><kbd>L</kbd></td></tr>
+    <tr><td>Стрелка</td><td><kbd>A</kbd></td></tr>
+    <tr><td>Текст</td><td><kbd>T</kbd></td></tr>
+    <tr><td>Карандаш</td><td><kbd>P</kbd></td></tr>
+  </table>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   Состояние
+============================================================ */
+const state = {
+  img: null,            // Image со скриншотом
+  bg: {
+    type: "gradient",   // gradient | solid | image | custom
+    preset: 2,          // индекс пресета градиента
+    solid: "#e2e8f0",
+    image: null,        // Image для фона
+    custom: null,       // {c1, c2, angle}
+    blur: 0
+  },
+  imgScale: 100,
+  position: 4,          // 0..8
+  padding: 60,
+  inset: 0,
+  insetColor: "#ffffff",
+  shadow: 30,
+  shadowColor: "#000000",
+  rounded: 16,
+  border: 0,
+  borderColor: "#ffffff",
+  mockup: "none",       // none | light | dark
+  aspect: { mode: "auto" }, // auto | ratio {r} | fixed {w,h}
+  watermark: false,
+  wmText: "@NeuralProfit",
+  exportScale: 2,
+  format: "png",
+  annotations: [],
+  selected: -1,
+  tool: "select",
+  annColor: "#ef4444",
+  annWidth: 5,
+  annFill: false,
+  zoom: "fit"
+};
+
+const GRADIENTS = [
+  [135, ["#fbc2a4", "#f6d365"]],
+  [135, ["#ff9a9e", "#fecfef"]],
+  [120, ["#a18cd1", "#fbc2eb"]],
+  [135, ["#84fab0", "#8fd3f4"]],
+  [135, ["#8b5cf6", "#6366f1"]],
+  [135, ["#43e97b", "#38f9d7"]],
+  [135, ["#4f46e5", "#2563eb"]],
+  [135, ["#f472b6", "#db2777"]],
+  [135, ["#fda4af", "#e11d48"]],
+  [135, ["#0f172a", "#334155"]],
+  [135, ["#b45309", "#78350f"]],
+  [135, ["#fbbf24", "#1f2937"]],
+  [135, ["#f97316", "#dc2626"]],
+  [135, ["#0d9488", "#134e4a"]],
+  [135, ["#581c87", "#1e1b4b"]],
+  [20,  ["#f43f5e", "#f97316", "#facc15"]],
+  [200, ["#06b6d4", "#3b82f6", "#1e40af"]],
+  [135, ["#f9a8d4", "#c084fc", "#818cf8"]],
+  [135, ["#bef264", "#38bdf8"]],
+  [135, ["#e2e8f0", "#94a3b8"]]
+];
+const SOLIDS = ["#ffffff", "#f1f5f9", "#e2e8f0", "#0f172a", "#1e293b",
+                "#7c3aed", "#2563eb", "#059669", "#dc2626", "#f59e0b"];
+const SOCIAL = [
+  ["Пост Twitter/X", 1200, 675],
+  ["Пост Facebook", 1200, 630],
+  ["Пост Instagram", 1080, 1350],
+  ["Сторис Instagram", 1080, 1920],
+  ["Пост LinkedIn", 1200, 627],
+  ["Пин Pinterest", 1000, 1500]
+];
+const EMOJIS = ["🔥","❤️","😂","👍","✨","⚠️","✅","❌","➡️","💡","🎯","⭐","💰","🚀","🤖","👀"];
+
+const canvas = document.getElementById("preview");
+const ctx = canvas.getContext("2d");
+const NATIVE = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.native);
+function nativePost(msg) { window.webkit.messageHandlers.native.postMessage(msg); }
+let undoStack = [];
+let pendingEmoji = null;
+
+/* ============================================================
+   Раскладка холста
+============================================================ */
+function mockupBarH(cardW) {
+  if (state.mockup === "none") return 0;
+  return Math.round(Math.min(48, Math.max(24, cardW * 0.045)));
+}
+
+function layout() {
+  const img = state.img;
+  const pad = state.padding;
+  const inset = state.inset;
+  const k = state.imgScale / 100;
+  let iw = img ? img.naturalWidth : 900;
+  let ih = img ? img.naturalHeight : 560;
+
+  let W, H, imgW, imgH;
+  const a = state.aspect;
+  if (a.mode === "fixed") {
+    W = a.w; H = a.h;
+    const availW = Math.max(50, W - pad * 2 - inset * 2);
+    const availH = Math.max(50, H - pad * 2 - inset * 2);
+    const fit = Math.min(availW / iw, (availH - 48) / ih);
+    imgW = iw * fit * k;
+    imgH = ih * fit * k;
+  } else {
+    imgW = iw * k;
+    imgH = ih * k;
+    const barH0 = mockupBarH(imgW + inset * 2);
+    let baseW = imgW + inset * 2 + pad * 2;
+    let baseH = imgH + inset * 2 + barH0 + pad * 2;
+    if (a.mode === "ratio") {
+      if (baseW / baseH > a.r) baseH = baseW / a.r;
+      else baseW = baseH * a.r;
+    }
+    W = Math.round(baseW); H = Math.round(baseH);
+  }
+
+  const cardW = imgW + inset * 2;
+  const barH = mockupBarH(cardW);
+  const cardH = imgH + inset * 2 + barH;
+
+  const col = state.position % 3, row = Math.floor(state.position / 3);
+  const xs = [pad, (W - cardW) / 2, W - pad - cardW];
+  const ys = [pad, (H - cardH) / 2, H - pad - cardH];
+  const cardX = xs[col], cardY = ys[row];
+
+  return {
+    W, H, barH,
+    card: { x: cardX, y: cardY, w: cardW, h: cardH },
+    img: { x: cardX + inset, y: cardY + inset + barH, w: imgW, h: imgH }
+  };
+}
+
+/* ============================================================
+   Рендер
+============================================================ */
+function roundRect(c, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function drawChecker(c, W, H) {
+  const s = 16;
+  c.fillStyle = "#ffffff";
+  c.fillRect(0, 0, W, H);
+  c.fillStyle = "#e5e7eb";
+  for (let y = 0; y < H; y += s)
+    for (let x = ((y / s) % 2) * s; x < W; x += s * 2) c.fillRect(x, y, s, s);
+}
+
+function drawBackground(c, W, H, scale, forExport) {
+  const bg = state.bg;
+  if (bg.type === "transparent") {
+    // в превью показываем шахматку, в файл фон не попадает (альфа-канал)
+    if (!forExport) drawChecker(c, W, H);
+    return;
+  }
+  const paint = (cc) => {
+    if (bg.type === "solid") {
+      cc.fillStyle = bg.solid;
+      cc.fillRect(0, 0, W, H);
+    } else if (bg.type === "image" && bg.image) {
+      const im = bg.image;
+      const s = Math.max(W / im.naturalWidth, H / im.naturalHeight);
+      const dw = im.naturalWidth * s, dh = im.naturalHeight * s;
+      cc.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    } else {
+      let angle, colors;
+      if (bg.type === "custom" && bg.custom) {
+        angle = bg.custom.angle; colors = [bg.custom.c1, bg.custom.c2];
+      } else {
+        const p = GRADIENTS[bg.preset] || GRADIENTS[0];
+        angle = p[0]; colors = p[1];
+      }
+      const rad = (angle - 90) * Math.PI / 180;
+      const cx = W / 2, cy = H / 2;
+      const len = (Math.abs(W * Math.cos(rad)) + Math.abs(H * Math.sin(rad))) / 2;
+      const g = cc.createLinearGradient(cx - Math.cos(rad) * len, cy - Math.sin(rad) * len,
+                                        cx + Math.cos(rad) * len, cy + Math.sin(rad) * len);
+      colors.forEach((col, i) => g.addColorStop(i / (colors.length - 1), col));
+      cc.fillStyle = g;
+      cc.fillRect(0, 0, W, H);
+    }
+  };
+  if (bg.blur > 0) {
+    const off = document.createElement("canvas");
+    off.width = W; off.height = H;
+    paint(off.getContext("2d"));
+    c.save();
+    // filter работает в пикселях итогового холста и не масштабируется трансформацией
+    c.filter = "blur(" + bg.blur * scale + "px)";
+    const m = bg.blur * 2;
+    c.drawImage(off, -m, -m, W + m * 2, H + m * 2);
+    c.filter = "none";
+    c.restore();
+  } else {
+    paint(c);
+  }
+}
+
+function hexToRgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+}
+
+function drawScene(c, scale, forExport) {
+  const L = layout();
+  c.save();
+  c.scale(scale, scale);
+
+  drawBackground(c, L.W, L.H, scale, forExport);
+
+  if (state.img) {
+    const { card, img, barH } = L;
+    const r = state.rounded;
+
+    // тень в два слоя: широкая мягкая (объем) + плотная у кромки (контакт)
+    if (state.shadow > 0) {
+      const s = state.shadow;
+      const layers = [
+        { a: 0.30, blur: s * 2.4, dy: s * 1.0 },
+        { a: 0.40, blur: s * 0.7, dy: s * 0.3 }
+      ];
+      // фигуру рисуем далеко за холстом, а тень сдвигаем обратно -
+      // так на холст ложится только тень, без черной заливки под картинкой
+      const OFF = 100000;
+      // без подложки и мокапа тень повторяет контур самой картинки:
+      // логотипы и стикеры с прозрачными полями не получают квадратной тени
+      let caster = null;
+      if (state.inset === 0 && state.mockup === "none") {
+        caster = document.createElement("canvas");
+        caster.width = Math.max(1, Math.round(img.w * scale));
+        caster.height = Math.max(1, Math.round(img.h * scale));
+        const cc = caster.getContext("2d");
+        cc.scale(scale, scale);
+        roundRect(cc, 0, 0, img.w, img.h, r);
+        cc.clip();
+        cc.drawImage(state.img, 0, 0, img.w, img.h);
+      }
+      layers.forEach(l => {
+        c.save();
+        c.shadowColor = hexToRgba(state.shadowColor, l.a);
+        // shadowBlur/shadowOffset не масштабируются трансформацией - домножаем вручную
+        c.shadowBlur = l.blur * scale;
+        c.shadowOffsetX = OFF * scale;
+        c.shadowOffsetY = l.dy * scale;
+        if (caster) {
+          c.drawImage(caster, img.x - OFF, img.y, img.w, img.h);
+        } else {
+          roundRect(c, card.x - OFF, card.y, card.w, card.h, r);
+          c.fillStyle = "#000";
+          c.fill();
+        }
+        c.restore();
+      });
+    }
+
+    // карточка (подложка + мокап + картинка) с обрезкой по скруглению
+    c.save();
+    roundRect(c, card.x, card.y, card.w, card.h, r);
+    c.clip();
+
+    if (state.inset > 0 || state.mockup !== "none") {
+      c.fillStyle = state.mockup === "dark" ? "#26272b" : state.insetColor;
+      c.fillRect(card.x, card.y, card.w, card.h);
+    }
+
+    if (barH > 0) {
+      c.fillStyle = state.mockup === "dark" ? "#3a3b40" : "#f1f3f5";
+      c.fillRect(card.x, card.y, card.w, barH);
+      const rr = barH * 0.16;
+      const cyy = card.y + barH / 2;
+      ["#ff5f57", "#febc2e", "#28c840"].forEach((col, i) => {
+        c.beginPath();
+        c.arc(card.x + barH * 0.55 + i * barH * 0.55, cyy, rr, 0, Math.PI * 2);
+        c.fillStyle = col;
+        c.fill();
+      });
+      // адресная строка
+      const px = card.x + barH * 2.2, pw = card.w - barH * 2.2 - barH * 0.5;
+      if (pw > 40) {
+        roundRect(c, px, card.y + barH * 0.22, pw, barH * 0.56, barH * 0.28);
+        c.fillStyle = state.mockup === "dark" ? "#26272b" : "#ffffff";
+        c.fill();
+      }
+    }
+
+    const innerR = Math.max(0, r - state.inset);
+    if (state.inset > 0 && state.mockup === "none") {
+      c.save();
+      roundRect(c, img.x, img.y, img.w, img.h, innerR);
+      c.clip();
+      c.drawImage(state.img, img.x, img.y, img.w, img.h);
+      c.restore();
+    } else {
+      c.drawImage(state.img, img.x, img.y, img.w, img.h);
+    }
+    c.restore();
+
+    // обводка
+    if (state.border > 0) {
+      c.save();
+      roundRect(c, card.x, card.y, card.w, card.h, r);
+      c.lineWidth = state.border;
+      c.strokeStyle = state.borderColor;
+      c.stroke();
+      c.restore();
+    }
+  }
+
+  // аннотации
+  state.annotations.forEach((a, i) => drawAnnotation(c, a, i === state.selected && state.tool === "select", scale));
+
+  // подпись
+  if (state.watermark && state.wmText.trim()) {
+    const fs = Math.min(28, Math.max(14, L.W * 0.018));
+    c.font = "600 " + fs + "px -apple-system, sans-serif";
+    c.textAlign = "center";
+    c.textBaseline = "bottom";
+    c.shadowColor = "rgba(0,0,0,.45)";
+    c.shadowBlur = 6 * scale;
+    c.fillStyle = "rgba(255,255,255,.92)";
+    c.fillText(state.wmText, L.W / 2, L.H - fs * 0.6);
+    c.shadowBlur = 0;
+    c.textAlign = "start";
+    c.textBaseline = "alphabetic";
+  }
+
+  c.restore();
+}
+
+function drawAnnotation(c, a, selected, scale) {
+  scale = scale || 1;
+  c.save();
+  c.strokeStyle = a.color;
+  c.fillStyle = a.color;
+  c.lineWidth = a.width;
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  if (a.type === "rect") {
+    if (a.fill) c.fillRect(a.x, a.y, a.w, a.h);
+    else c.strokeRect(a.x, a.y, a.w, a.h);
+  } else if (a.type === "ellipse") {
+    c.beginPath();
+    c.ellipse(a.x + a.w / 2, a.y + a.h / 2, Math.abs(a.w / 2), Math.abs(a.h / 2), 0, 0, Math.PI * 2);
+    if (a.fill) c.fill(); else c.stroke();
+  } else if (a.type === "line" || a.type === "arrow") {
+    c.beginPath();
+    c.moveTo(a.x, a.y);
+    c.lineTo(a.x2, a.y2);
+    c.stroke();
+    if (a.type === "arrow") {
+      const ang = Math.atan2(a.y2 - a.y, a.x2 - a.x);
+      const hl = Math.max(12, a.width * 3.2);
+      c.beginPath();
+      c.moveTo(a.x2, a.y2);
+      c.lineTo(a.x2 - hl * Math.cos(ang - 0.45), a.y2 - hl * Math.sin(ang - 0.45));
+      c.moveTo(a.x2, a.y2);
+      c.lineTo(a.x2 - hl * Math.cos(ang + 0.45), a.y2 - hl * Math.sin(ang + 0.45));
+      c.stroke();
+    }
+  } else if (a.type === "text") {
+    c.font = "700 " + a.size + "px -apple-system, sans-serif";
+    c.textBaseline = "top";
+    c.shadowColor = "rgba(0,0,0,.25)";
+    c.shadowBlur = 3 * scale;
+    c.fillText(a.text, a.x, a.y);
+  } else if (a.type === "emoji") {
+    c.font = a.size + "px -apple-system, sans-serif";
+    c.textBaseline = "top";
+    c.fillText(a.char, a.x, a.y);
+  } else if (a.type === "pencil") {
+    c.beginPath();
+    const p = a.points;
+    if (p.length > 1) {
+      c.moveTo(p[0][0], p[0][1]);
+      for (let i = 1; i < p.length - 1; i++) {
+        c.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2);
+      }
+      c.stroke();
+    }
+  }
+  if (selected) {
+    const b = annBounds(a);
+    c.setLineDash([6, 4]);
+    c.lineWidth = 1.5;
+    c.strokeStyle = "#6d28d9";
+    c.strokeRect(b.x - 6, b.y - 6, b.w + 12, b.h + 12);
+  }
+  c.restore();
+}
+
+function annBounds(a) {
+  if (a.type === "rect" || a.type === "ellipse") {
+    return { x: Math.min(a.x, a.x + a.w), y: Math.min(a.y, a.y + a.h), w: Math.abs(a.w), h: Math.abs(a.h) };
+  }
+  if (a.type === "line" || a.type === "arrow") {
+    return { x: Math.min(a.x, a.x2), y: Math.min(a.y, a.y2), w: Math.abs(a.x2 - a.x), h: Math.abs(a.y2 - a.y) };
+  }
+  if (a.type === "text") {
+    ctx.font = "700 " + a.size + "px -apple-system, sans-serif";
+    const w = ctx.measureText(a.text).width;
+    return { x: a.x, y: a.y, w, h: a.size * 1.2 };
+  }
+  if (a.type === "emoji") return { x: a.x, y: a.y, w: a.size * 1.2, h: a.size * 1.2 };
+  if (a.type === "pencil") {
+    const xs = a.points.map(p => p[0]), ys = a.points.map(p => p[1]);
+    const x = Math.min(...xs), y = Math.min(...ys);
+    return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+  }
+  return { x: 0, y: 0, w: 0, h: 0 };
+}
+
+/* ============================================================
+   Превью и зум
+============================================================ */
+function render() {
+  const L = layout();
+  canvas.width = L.W;
+  canvas.height = L.H;
+  drawScene(ctx, 1, false);
+  applyZoom();
+}
+
+function applyZoom() {
+  const area = document.getElementById("canvasArea");
+  let z = state.zoom;
+  if (z === "fit") {
+    const availW = area.clientWidth - 60;
+    const availH = area.clientHeight - 60;
+    z = Math.min(availW / canvas.width, availH / canvas.height, 1);
+  } else z = parseFloat(z);
+  canvas.style.width = canvas.width * z + "px";
+  canvas.style.height = canvas.height * z + "px";
+  canvas.dataset.zoom = z;
+}
+
+window.addEventListener("resize", applyZoom);
+
+/* ============================================================
+   Загрузка картинки
+============================================================ */
+function loadImageFromBlob(blob) {
+  const url = URL.createObjectURL(blob);
+  const im = new Image();
+  im.onload = () => {
+    state.img = im;
+    state.annotations = [];
+    state.selected = -1;
+    document.getElementById("dropzone").classList.add("hidden");
+    render();
+  };
+  im.src = url;
+}
+
+document.getElementById("btnBrowse").onclick = () => document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange = (e) => {
+  if (e.target.files[0]) loadImageFromBlob(e.target.files[0]);
+  e.target.value = "";
+};
+
+// drag & drop
+["dragover", "dragenter"].forEach(ev => window.addEventListener(ev, (e) => {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.add("drag");
+}));
+["dragleave", "drop"].forEach(ev => window.addEventListener(ev, (e) => {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.remove("drag");
+}));
+window.addEventListener("drop", (e) => {
+  const f = [...(e.dataTransfer.files || [])].find(f => f.type.startsWith("image/"));
+  if (f) loadImageFromBlob(f);
+});
+
+// вставка из буфера
+window.addEventListener("paste", (e) => {
+  const item = [...(e.clipboardData.items || [])].find(i => i.type.startsWith("image/"));
+  if (item) loadImageFromBlob(item.getAsFile());
+});
+
+// захват экрана
+document.getElementById("btnCapture").onclick = async () => {
+  if (NATIVE) { nativePost({ type: "capture" }); return; }
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    await video.play();
+    await new Promise(r => setTimeout(r, 400));
+    const c = document.createElement("canvas");
+    c.width = video.videoWidth; c.height = video.videoHeight;
+    c.getContext("2d").drawImage(video, 0, 0);
+    stream.getTracks().forEach(t => t.stop());
+    c.toBlob(b => loadImageFromBlob(b));
+  } catch (err) {
+    toast("Захват экрана не удался: " + err.message);
+  }
+};
+
+document.getElementById("btnNew").onclick = () => {
+  state.img = null;
+  state.annotations = [];
+  state.selected = -1;
+  document.getElementById("dropzone").classList.remove("hidden");
+  render();
+};
+
+/* ============================================================
+   Панель настроек
+============================================================ */
+function bindSlider(id, key, valId, suffix) {
+  const el = document.getElementById(id);
+  el.addEventListener("input", () => {
+    state[key] = parseInt(el.value);
+    document.getElementById(valId).textContent = el.value + (suffix || "");
+    render();
+  });
+}
+bindSlider("imgScale", "imgScale", "imgScaleVal", "%");
+bindSlider("padding", "padding", "paddingVal");
+bindSlider("inset", "inset", "insetVal");
+bindSlider("shadow", "shadow", "shadowVal");
+bindSlider("rounded", "rounded", "roundedVal");
+bindSlider("border", "border", "borderVal");
+
+document.getElementById("insetColor").oninput = (e) => { state.insetColor = e.target.value; render(); };
+document.getElementById("shadowColor").oninput = (e) => { state.shadowColor = e.target.value; render(); };
+document.getElementById("borderColor").oninput = (e) => { state.borderColor = e.target.value; render(); };
+
+// позиция 3x3
+const posGrid = document.getElementById("posGrid");
+for (let i = 0; i < 9; i++) {
+  const b = document.createElement("button");
+  if (i === 4) b.classList.add("active");
+  b.onclick = () => {
+    state.position = i;
+    posGrid.querySelectorAll("button").forEach((x, j) => x.classList.toggle("active", j === i));
+    render();
+  };
+  posGrid.appendChild(b);
+}
+
+// фоны
+const gradGrid = document.getElementById("gradGrid");
+GRADIENTS.forEach((g, i) => {
+  const d = document.createElement("div");
+  d.className = "sw" + (i === state.bg.preset ? " active" : "");
+  d.style.background = "linear-gradient(" + g[0] + "deg," + g[1].join(",") + ")";
+  d.onclick = () => {
+    state.bg.type = "gradient";
+    state.bg.preset = i;
+    document.querySelectorAll(".grid-bg .sw").forEach(x => x.classList.remove("active"));
+    d.classList.add("active");
+    render();
+  };
+  gradGrid.appendChild(d);
+});
+const solidGrid = document.getElementById("solidGrid");
+const transparentSw = document.createElement("div");
+transparentSw.className = "sw checker";
+transparentSw.title = "Прозрачный фон - скриншот будет парить на любом фоне";
+transparentSw.onclick = () => {
+  state.bg.type = "transparent";
+  document.querySelectorAll(".grid-bg .sw").forEach(x => x.classList.remove("active"));
+  transparentSw.classList.add("active");
+  render();
+};
+solidGrid.appendChild(transparentSw);
+SOLIDS.forEach(col => {
+  const d = document.createElement("div");
+  d.className = "sw";
+  d.style.background = col;
+  d.style.border = "1px solid #e2e8f0";
+  d.onclick = () => {
+    state.bg.type = "solid";
+    state.bg.solid = col;
+    document.getElementById("solidColor").value = col;
+    document.querySelectorAll(".grid-bg .sw").forEach(x => x.classList.remove("active"));
+    d.classList.add("active");
+    render();
+  };
+  solidGrid.appendChild(d);
+});
+document.getElementById("solidColor").oninput = (e) => {
+  state.bg.type = "solid";
+  state.bg.solid = e.target.value;
+  render();
+};
+
+document.getElementById("bgTabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  document.querySelectorAll("#bgTabs button").forEach(x => x.classList.toggle("active", x === b));
+  const tab = b.dataset.tab;
+  document.getElementById("bgTabGradient").classList.toggle("hidden", tab !== "gradient");
+  document.getElementById("bgTabSolid").classList.toggle("hidden", tab !== "solid");
+  document.getElementById("bgTabImage").classList.toggle("hidden", tab !== "image");
+});
+
+document.getElementById("btnBgImage").onclick = () => document.getElementById("bgImageInput").click();
+document.getElementById("bgImageInput").onchange = (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const im = new Image();
+  im.onload = () => { state.bg.type = "image"; state.bg.image = im; render(); };
+  im.src = URL.createObjectURL(f);
+  e.target.value = "";
+};
+
+document.getElementById("bgAdvToggle").onclick = () => {
+  document.getElementById("bgAdv").classList.toggle("hidden");
+};
+function customGradient() {
+  state.bg.type = "custom";
+  state.bg.custom = {
+    c1: document.getElementById("gradC1").value,
+    c2: document.getElementById("gradC2").value,
+    angle: parseInt(document.getElementById("gradAngle").value)
+  };
+  document.getElementById("gradAngleVal").textContent = state.bg.custom.angle;
+  render();
+}
+document.getElementById("gradC1").oninput = customGradient;
+document.getElementById("gradC2").oninput = customGradient;
+document.getElementById("gradAngle").oninput = customGradient;
+document.getElementById("bgBlur").oninput = (e) => {
+  state.bg.blur = parseInt(e.target.value);
+  document.getElementById("bgBlurVal").textContent = e.target.value;
+  render();
+};
+
+// мокап
+document.getElementById("mockupSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  state.mockup = b.dataset.v;
+  document.querySelectorAll("#mockupSeg button").forEach(x => x.classList.toggle("active", x === b));
+  render();
+});
+
+// аспекты
+document.getElementById("ratioChips").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  const r = b.dataset.r;
+  if (r === "auto") state.aspect = { mode: "auto" };
+  else {
+    const [w, h] = r.split(":").map(Number);
+    state.aspect = { mode: "ratio", r: w / h };
+  }
+  document.querySelectorAll("#ratioChips button").forEach(x => x.classList.toggle("active", x === b));
+  document.querySelectorAll("#socialList li").forEach(x => x.classList.remove("active"));
+  render();
+});
+const socialList = document.getElementById("socialList");
+SOCIAL.forEach(([name, w, h]) => {
+  const li = document.createElement("li");
+  li.innerHTML = "<span>" + name + "</span><span>" + w + "x" + h + "</span>";
+  li.onclick = () => {
+    state.aspect = { mode: "fixed", w, h };
+    document.querySelectorAll("#socialList li").forEach(x => x.classList.toggle("active", x === li));
+    document.querySelectorAll("#ratioChips button").forEach(x => x.classList.remove("active"));
+    render();
+  };
+  socialList.appendChild(li);
+});
+function customSize() {
+  const w = parseInt(document.getElementById("customW").value);
+  const h = parseInt(document.getElementById("customH").value);
+  if (w > 50 && h > 50) {
+    state.aspect = { mode: "fixed", w, h };
+    document.querySelectorAll("#ratioChips button, #socialList li").forEach(x => x.classList.remove("active"));
+    render();
+  }
+}
+document.getElementById("customW").onchange = customSize;
+document.getElementById("customH").onchange = customSize;
+
+// подпись
+document.getElementById("wmToggle").onchange = (e) => { state.watermark = e.target.checked; render(); };
+document.getElementById("wmText").oninput = (e) => { state.wmText = e.target.value; render(); };
+
+// качество
+document.getElementById("qualitySeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  state.exportScale = parseInt(b.dataset.v);
+  document.querySelectorAll("#qualitySeg button").forEach(x => x.classList.toggle("active", x === b));
+});
+
+// зум
+document.getElementById("zoomSelect").onchange = (e) => { state.zoom = e.target.value; applyZoom(); };
+
+/* ============================================================
+   Аннотации: инструменты и мышь
+============================================================ */
+const toolbar = document.getElementById("toolbar");
+toolbar.addEventListener("click", (e) => {
+  const b = e.target.closest(".tool[data-tool]");
+  if (!b) return;
+  setTool(b.dataset.tool);
+});
+function setTool(t) {
+  state.tool = t;
+  pendingEmoji = null;
+  document.querySelectorAll("#toolbar .tool[data-tool]").forEach(x =>
+    x.classList.toggle("active", x.dataset.tool === t));
+  canvas.style.cursor = t === "select" ? "default" : "crosshair";
+  render();
+}
+document.getElementById("annColor").oninput = (e) => {
+  state.annColor = e.target.value;
+  if (state.selected >= 0) { state.annotations[state.selected].color = e.target.value; render(); }
+};
+document.getElementById("annWidth").oninput = (e) => {
+  state.annWidth = parseInt(e.target.value);
+  if (state.selected >= 0) {
+    const a = state.annotations[state.selected];
+    if (a.type === "text" || a.type === "emoji") a.size = state.annWidth * 8;
+    else a.width = state.annWidth;
+    render();
+  }
+};
+document.getElementById("annFill").onchange = (e) => { state.annFill = e.target.checked; };
+
+document.getElementById("undoBtn").onclick = undo;
+document.getElementById("clearAnnBtn").onclick = () => {
+  pushUndo();
+  state.annotations = [];
+  state.selected = -1;
+  render();
+};
+
+function pushUndo() {
+  undoStack.push(JSON.stringify(state.annotations));
+  if (undoStack.length > 60) undoStack.shift();
+}
+function undo() {
+  if (!undoStack.length) return;
+  state.annotations = JSON.parse(undoStack.pop());
+  state.selected = -1;
+  render();
+}
+
+// палитра эмодзи
+const emojiPalette = document.getElementById("emojiPalette");
+EMOJIS.forEach(ch => {
+  const b = document.createElement("button");
+  b.textContent = ch;
+  b.onclick = () => {
+    pendingEmoji = ch;
+    emojiPalette.classList.remove("open");
+    setToolVisual(null);
+    canvas.style.cursor = "copy";
+    toast("Кликни по холсту, чтобы поставить " + ch);
+  };
+  emojiPalette.appendChild(b);
+});
+function setToolVisual(t) {
+  document.querySelectorAll("#toolbar .tool[data-tool]").forEach(x =>
+    x.classList.toggle("active", x.dataset.tool === t));
+}
+document.getElementById("emojiBtn").onclick = (e) => {
+  const r = e.target.getBoundingClientRect();
+  const wrap = document.getElementById("canvasWrap").getBoundingClientRect();
+  emojiPalette.style.left = Math.max(0, r.left - wrap.left) + "px";
+  emojiPalette.style.top = "6px";
+  emojiPalette.classList.toggle("open");
+};
+
+function canvasPoint(e) {
+  const r = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (canvas.width / r.width),
+    y: (e.clientY - r.top) * (canvas.height / r.height)
+  };
+}
+
+let drawing = null; // {ann} создаваемая
+let dragging = null; // {idx, dx, dy} перемещение
+
+canvas.addEventListener("mousedown", (e) => {
+  if (!state.img) return;
+  const p = canvasPoint(e);
+
+  if (pendingEmoji) {
+    pushUndo();
+    state.annotations.push({ type: "emoji", char: pendingEmoji, x: p.x - 24, y: p.y - 24, size: 48, color: "#000" });
+    pendingEmoji = null;
+    canvas.style.cursor = "default";
+    setTool("select");
+    render();
+    return;
+  }
+
+  const t = state.tool;
+  if (t === "select") {
+    for (let i = state.annotations.length - 1; i >= 0; i--) {
+      const b = annBounds(state.annotations[i]);
+      if (p.x >= b.x - 8 && p.x <= b.x + b.w + 8 && p.y >= b.y - 8 && p.y <= b.y + b.h + 8) {
+        state.selected = i;
+        dragging = { idx: i, px: p.x, py: p.y, snapshot: JSON.stringify(state.annotations) };
+        render();
+        return;
+      }
+    }
+    state.selected = -1;
+    render();
+    return;
+  }
+
+  if (t === "text") {
+    openTextEditor(p.x, p.y);
+    return;
+  }
+
+  pushUndo();
+  const base = { color: state.annColor, width: state.annWidth };
+  if (t === "rect" || t === "ellipse") drawing = { ...base, type: t, x: p.x, y: p.y, w: 0, h: 0, fill: state.annFill };
+  else if (t === "line" || t === "arrow") drawing = { ...base, type: t, x: p.x, y: p.y, x2: p.x, y2: p.y };
+  else if (t === "pencil") drawing = { ...base, type: "pencil", points: [[p.x, p.y]] };
+  if (drawing) {
+    state.annotations.push(drawing);
+    render();
+  }
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  const p = canvasPoint(e);
+  if (dragging) {
+    const a = state.annotations[dragging.idx];
+    const dx = p.x - dragging.px, dy = p.y - dragging.py;
+    dragging.px = p.x; dragging.py = p.y;
+    if (a.type === "pencil") a.points = a.points.map(pt => [pt[0] + dx, pt[1] + dy]);
+    else {
+      a.x += dx; a.y += dy;
+      if (a.x2 !== undefined) { a.x2 += dx; a.y2 += dy; }
+    }
+    render();
+    return;
+  }
+  if (!drawing) return;
+  if (drawing.type === "rect" || drawing.type === "ellipse") {
+    drawing.w = p.x - drawing.x;
+    drawing.h = p.y - drawing.y;
+  } else if (drawing.type === "line" || drawing.type === "arrow") {
+    drawing.x2 = p.x; drawing.y2 = p.y;
+  } else if (drawing.type === "pencil") {
+    drawing.points.push([p.x, p.y]);
+  }
+  render();
+});
+
+window.addEventListener("mouseup", () => {
+  if (dragging) {
+    undoStack.push(dragging.snapshot);
+    dragging = null;
+  }
+  if (drawing) {
+    const b = annBounds(drawing);
+    if (b.w < 3 && b.h < 3 && drawing.type !== "pencil") {
+      state.annotations.pop();
+      undoStack.pop();
+    }
+    drawing = null;
+    render();
+  }
+});
+
+// текст
+const textEditor = document.getElementById("textEditor");
+let textPos = null;
+let editingIdx = -1;
+let justOpened = false;
+function openTextEditor(x, y, existing) {
+  textPos = { x, y };
+  const z = parseFloat(canvas.dataset.zoom || 1);
+  textEditor.style.left = (canvas.offsetLeft + x * z) + "px";
+  textEditor.style.top = (canvas.offsetTop + y * z) + "px";
+  textEditor.style.fontSize = Math.max(14, (existing ? existing.size : state.annWidth * 8) * z) + "px";
+  textEditor.style.color = existing ? existing.color : state.annColor;
+  textEditor.value = existing ? existing.text : "";
+  textEditor.style.display = "block";
+  // окно ввода не должно закрыться от blur, пока курсор не встал в поле
+  justOpened = true;
+  textEditor.focus();
+  setTimeout(() => { textEditor.focus(); justOpened = false; }, 200);
+}
+function commitText() {
+  if (textEditor.style.display === "none" || justOpened) return;
+  const val = textEditor.value.trim();
+  textEditor.style.display = "none";
+  if (editingIdx >= 0) {
+    pushUndo();
+    if (val) state.annotations[editingIdx].text = val;
+    else state.annotations.splice(editingIdx, 1);
+    editingIdx = -1;
+  } else if (val && textPos) {
+    pushUndo();
+    state.annotations.push({
+      type: "text", text: val, x: textPos.x, y: textPos.y,
+      size: state.annWidth * 8, color: state.annColor, width: 1
+    });
+  }
+  textPos = null;
+  setTool("select");
+  render();
+}
+textEditor.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") commitText();
+  if (e.key === "Escape") { textEditor.style.display = "none"; textPos = null; editingIdx = -1; }
+});
+textEditor.addEventListener("blur", commitText);
+
+canvas.addEventListener("dblclick", (e) => {
+  const p = canvasPoint(e);
+  for (let i = state.annotations.length - 1; i >= 0; i--) {
+    const a = state.annotations[i];
+    if (a.type !== "text") continue;
+    const b = annBounds(a);
+    if (p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h) {
+      editingIdx = i;
+      openTextEditor(a.x, a.y, a);
+      return;
+    }
+  }
+});
+
+/* ============================================================
+   Экспорт, копирование, сохранение
+============================================================ */
+function renderExport(fmt) {
+  const L = layout();
+  const s = state.exportScale;
+  const off = document.createElement("canvas");
+  off.width = Math.round(L.W * s);
+  off.height = Math.round(L.H * s);
+  const oc = off.getContext("2d");
+  if (fmt === "jpeg" && state.bg.type === "transparent") {
+    // у JPG нет прозрачности - подкладываем белый
+    oc.fillStyle = "#ffffff";
+    oc.fillRect(0, 0, off.width, off.height);
+  }
+  const sel = state.selected;
+  state.selected = -1;
+  drawScene(oc, s, true);
+  state.selected = sel;
+  return off;
+}
+
+function exportFilename(fmt) {
+  const d = new Date();
+  const pad2 = n => String(n).padStart(2, "0");
+  return "snap-" + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) +
+         "-" + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds()) +
+         "." + (fmt === "jpeg" ? "jpg" : fmt);
+}
+
+function exportImage() {
+  if (!state.img) { toast("Сначала добавь картинку"); return; }
+  const fmt = state.format;
+  const mime = "image/" + fmt;
+  toast("Готовлю файл...");
+  if (fmt === "jpeg" && state.bg.type === "transparent") toast("JPG не умеет прозрачность - фон будет белым. Для прозрачного выбери PNG.");
+  const off = renderExport(fmt);
+  off.toBlob((blob) => {
+    const name = exportFilename(fmt);
+    if (NATIVE) {
+      blobToBase64(blob).then(b64 => nativePost({ type: "save", data: b64, filename: name, mime }));
+      return;
+    }
+    const a = document.createElement("a");
+    a.download = name;
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    toast("Готово! Файл скачан: " + name);
+  }, mime, fmt === "png" ? undefined : 0.92);
+}
+document.getElementById("btnExport").onclick = exportImage;
+document.getElementById("formatSelect").onchange = (e) => { state.format = e.target.value; };
+
+async function copyImage() {
+  if (!state.img) { toast("Сначала добавь картинку"); return; }
+  toast("Готовлю картинку...");
+  try {
+    const off = renderExport("png");
+    const blob = await new Promise(r => off.toBlob(r, "image/png"));
+    if (NATIVE) {
+      nativePost({ type: "copy", data: await blobToBase64(blob) });
+      return;
+    }
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    toast("Скопировано в буфер обмена!");
+  } catch (err) {
+    toast("Не удалось скопировать (" + err.message + "). Используй Экспорт.");
+  }
+}
+document.getElementById("btnCopy").onclick = copyImage;
+
+/* ============================================================
+   Мост к Mac-приложению (в браузере NATIVE = false и все работает как раньше)
+============================================================ */
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result.split(",")[1]);
+    fr.readAsDataURL(blob);
+  });
+}
+window.__native = {
+  receiveImage(b64, mime) {
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    loadImageFromBlob(new Blob([arr], { type: mime || "image/png" }));
+  },
+  toast(msg) { toast(msg); },
+  menuUndo() {
+    const el = document.activeElement;
+    if (el && ["INPUT", "TEXTAREA"].includes(el.tagName)) document.execCommand("undo");
+    else undo();
+  },
+  newSnap() { document.getElementById("btnNew").click(); },
+  setZoom(z) { state.zoom = z; document.getElementById("zoomSelect").value = z; applyZoom(); }
+};
+
+/* --------- проекты в localStorage --------- */
+const LS_KEY = "snap-studio-projects";
+function getProjects() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; }
+}
+function saveProject() {
+  if (!state.img) { toast("Сначала добавь картинку"); return; }
+  const c = document.createElement("canvas");
+  c.width = state.img.naturalWidth;
+  c.height = state.img.naturalHeight;
+  c.getContext("2d").drawImage(state.img, 0, 0);
+  const imgData = c.toDataURL("image/png");
+
+  const t = document.createElement("canvas");
+  const tz = 140 / canvas.width;
+  t.width = 140; t.height = Math.round(canvas.height * tz);
+  t.getContext("2d").drawImage(canvas, 0, 0, t.width, t.height);
+
+  const { img, annotations, selected, tool, zoom, ...settings } = state;
+  const bgImage = state.bg.image;
+  settings.bg = { ...state.bg, image: null };
+  const proj = {
+    id: Date.now(),
+    name: "Снап " + new Date().toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
+    imgData,
+    thumb: t.toDataURL("image/jpeg", 0.7),
+    settings,
+    annotations: state.annotations
+  };
+  const list = getProjects();
+  list.unshift(proj);
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(list));
+    toast("Проект сохранен!");
+  } catch (err) {
+    list.shift();
+    toast("Не хватило места в хранилище браузера. Удали старые снапы.");
+  }
+  state.bg.image = bgImage;
+  renderProjects();
+}
+function loadProject(p) {
+  const im = new Image();
+  im.onload = () => {
+    Object.assign(state, p.settings, { img: im, annotations: p.annotations || [], selected: -1 });
+    state.bg.image = null;
+    if (state.bg.type === "image") state.bg.type = "gradient";
+    document.getElementById("dropzone").classList.add("hidden");
+    syncControls();
+    render();
+    toast("Проект открыт");
+  };
+  im.src = p.imgData;
+}
+function deleteProject(id) {
+  const list = getProjects().filter(p => p.id !== id);
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+  renderProjects();
+}
+function renderProjects() {
+  const list = getProjects();
+  const box = document.getElementById("projList");
+  box.innerHTML = "";
+  document.getElementById("projEmpty").classList.toggle("hidden", list.length > 0);
+  list.forEach(p => {
+    const d = document.createElement("div");
+    d.className = "projitem";
+    d.innerHTML = '<img src="' + p.thumb + '"><div class="meta"><div class="nm">' + p.name +
+      '</div><div class="dt">' + new Date(p.id).toLocaleDateString("ru-RU") + "</div></div>" +
+      '<button class="del" title="Удалить">&#10005;</button>';
+    d.querySelector(".del").onclick = (e) => { e.stopPropagation(); deleteProject(p.id); };
+    d.onclick = () => loadProject(p);
+    box.appendChild(d);
+  });
+}
+document.getElementById("btnSave").onclick = saveProject;
+
+function syncControls() {
+  document.getElementById("imgScale").value = state.imgScale;
+  document.getElementById("imgScaleVal").textContent = state.imgScale + "%";
+  document.getElementById("padding").value = state.padding;
+  document.getElementById("paddingVal").textContent = state.padding;
+  document.getElementById("inset").value = state.inset;
+  document.getElementById("insetVal").textContent = state.inset;
+  document.getElementById("shadow").value = state.shadow;
+  document.getElementById("shadowVal").textContent = state.shadow;
+  document.getElementById("rounded").value = state.rounded;
+  document.getElementById("roundedVal").textContent = state.rounded;
+  document.getElementById("border").value = state.border;
+  document.getElementById("borderVal").textContent = state.border;
+  document.getElementById("wmToggle").checked = state.watermark;
+  document.getElementById("wmText").value = state.wmText;
+  posGrid.querySelectorAll("button").forEach((x, j) => x.classList.toggle("active", j === state.position));
+  document.querySelectorAll("#mockupSeg button").forEach(x => x.classList.toggle("active", x.dataset.v === state.mockup));
+  document.querySelectorAll("#qualitySeg button").forEach(x => x.classList.toggle("active", parseInt(x.dataset.v) === state.exportScale));
+}
+
+/* ============================================================
+   Хоткеи и мелочи
+============================================================ */
+document.getElementById("helpBtn").onclick = () => {
+  document.getElementById("shortcutsPanel").classList.toggle("open");
+};
+
+window.addEventListener("keydown", (e) => {
+  const inInput = ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName);
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); saveProject(); return; }
+  if (mod && e.key.toLowerCase() === "e") { e.preventDefault(); exportImage(); return; }
+  if (mod && e.shiftKey && e.key.toLowerCase() === "c") { e.preventDefault(); copyImage(); return; }
+  if (mod && e.key.toLowerCase() === "z") {
+    if (!inInput) { e.preventDefault(); undo(); }
+    return;
+  }
+  if (inInput) return;
+  if ((e.key === "Delete" || e.key === "Backspace") && state.selected >= 0) {
+    pushUndo();
+    state.annotations.splice(state.selected, 1);
+    state.selected = -1;
+    render();
+    return;
+  }
+  if (e.key === "Escape") { setTool("select"); emojiPalette.classList.remove("open"); return; }
+  const map = { v: "select", r: "rect", o: "ellipse", l: "line", a: "arrow", t: "text", p: "pencil" };
+  const t = map[e.key.toLowerCase()];
+  if (t && !mod) setTool(t);
+});
+
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* старт */
+renderProjects();
+render();
+</script>
+</body>
+</html>
